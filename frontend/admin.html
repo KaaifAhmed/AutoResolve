@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoResolve - Admin Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container admin-container" id="admin-page">
+        <header>
+            <h1>Admin Dashboard</h1>
+            <p class="text-muted">Review and approve pending tool calls from the AI Agent.</p>
+        </header>
+
+        <main id="pending-sessions-container">
+            <!-- Pending sessions will be dynamically injected here by script.js -->
+            <div class="message system" id="admin-loading">Loading pending requests...</div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
