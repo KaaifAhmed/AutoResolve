@@ -2,8 +2,9 @@ from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from langchain_core.messages import HumanMessage
+from database import SessionLocal, Order, reset_mock_database
 
-from app import app as langchain_app
+from app import app as langchain_app, sensitive_tools
 
 api = FastAPI(title="AutoResolve Backend")
 
@@ -17,6 +18,7 @@ api.add_middleware(
 
 class ChatRequest(BaseModel):
     session_id: str
+    customer_id: str
     message: str
 
 class AdminApprovalRequest(BaseModel):
@@ -31,12 +33,25 @@ class PendingApprovalRequest(BaseModel):
 
 admin_ids = {"kaaifahmed": "kaaifahmed123"}
 pending_approvals = {}
-sensitive_tools = ["refund_order", "cancel_order"]
+
+# 2. The API Endpoint
+@api.post("/database/reset")
+async def reset_system():
+    reset_mock_database()
+    
+    # Clear out any stuck pending approvals in the server memory
+    global pending_approvals
+    pending_approvals.clear()
+    
+    return {
+        "status": "success", 
+        "message": "Database fully reset to factory defaults."
+    }
 
 @api.post("/chat")
 async def chat_endpoint (request: ChatRequest):
     config = {"configurable": {"thread_id": request.session_id}}
-    init_state = {"messages": [HumanMessage(request.message)]}
+    init_state = {"messages": [HumanMessage(content=request.message)], "customer_id":request.customer_id}
     final = langchain_app.invoke(init_state, config=config)
 
     state = langchain_app.get_state(config)
@@ -60,6 +75,29 @@ async def chat_endpoint (request: ChatRequest):
         "status": "success",
         "ai_response": content
     }
+
+@api.get("/chat/status/{session_id}")
+async def get_chat_status (session_id: str):
+    config = {"configurable": {"thread_id": session_id}}
+    app_state = langchain_app.get_state(config=config)
+
+    if app_state.next == ('sensitive_tool_executor',):
+        return {
+            "status": "paused",
+        }
+    else:
+        content = app_state.values["messages"][-1].content
+    
+        # If the model returned a list of blocks (like Gemma/Gemini Pro)
+        if isinstance(content, list):
+            for block in content:
+                if isinstance(block, dict) and block.get("type") == "text":
+                    content = block['text']
+
+        return {
+            "status": "success",
+            "ai_response": content
+        }
 
 @api.post("/admin/pending")
 async def give_pending_approvals(request: PendingApprovalRequest):
@@ -93,26 +131,30 @@ async def update_approvals (request: AdminApprovalRequest):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Admin access denied."
         )
-    
-@api.get("/chat/status/{session_id}")
-async def get_chat_status (session_id: str):
-    config = {"configurable": {"thread_id": session_id}}
-    app_state = langchain_app.get_state(config=config)
 
-    if app_state.next == ('sensitive_tool_executor',):
-        return {
-            "status": "paused",
-        }
-    else:
-        content = app_state.values["messages"][-1].content
-    
-        # If the model returned a list of blocks (like Gemma/Gemini Pro)
-        if isinstance(content, list):
-            for block in content:
-                if isinstance(block, dict) and block.get("type") == "text":
-                    content = block['text']
-
+@api.get("/database/orders")
+async def get_all_orders():
+    db = SessionLocal()
+    try:
+        # Fetch all orders and sort them by customer_id
+        orders = db.query(Order).order_by(Order.customer_id).all()
+        
+        # Format the SQL objects into a clean JSON list
+        formatted_orders = [
+            {
+                "id": order.id,
+                "customer_id": order.customer_id,
+                "status": order.status,
+                "amount": order.amount,
+                "created_at": order.created_at.isoformat(),
+                "item_summary": order.item_summary
+            }
+            for order in orders
+        ]
+        
         return {
             "status": "success",
-            "ai_response": content
+            "orders": formatted_orders
         }
+    finally:
+        db.close()

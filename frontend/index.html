@@ -1,32 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AutoResolve - AI Agent</title>
-    <link rel="stylesheet" href="styles.css">
     <!-- Load a clean sans-serif font from Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-    <div class="container" id="chat-page">
-        <header>
-            <h1>AutoResolve</h1>
-            <p class="text-muted">Chat Interface &bull; Session: <span id="session-id-display">user_123</span></p>
-        </header>
 
-        <main class="chat-window">
-            <div class="chat-messages" id="chat-messages">
+<body>
+    <div class="app-container">
+        <!-- Left Panel: Agent Workspace -->
+        <div class="left-panel">
+            <header class="top-bar">
+                <div class="brand-title">AutoResolve</div>
+                <div class="persona-selector">
+                    <select id="customer-select">
+                        <option value="cust_001">Act as: Kaaif (cust_001)</option>
+                        <option value="cust_002">Act as: Alex (cust_002)</option>
+                        <option value="cust_003">Act as: Sara (cust_003)</option>
+                    </select>
+                </div>
+                <button id="reset-db-btn" class="btn-outlined">Reset DB</button>
+            </header>
+
+            <div class="chat-log" id="chat-messages">
                 <div class="message assistant">Hello! I'm AutoResolve. How can I help you today?</div>
             </div>
-            
-            <form class="chat-input-area" id="chat-form">
-                <input type="text" id="chat-input" placeholder="Type your message..." autocomplete="off" required>
-                <button type="submit" id="send-button">Send</button>
-            </form>
-        </main>
+
+            <div class="input-area">
+                <form id="chat-form">
+                    <input type="text" id="chat-input" placeholder="Type your message..." autocomplete="off" required>
+                    <button type="submit" id="send-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                            fill="currentColor">
+                            <path
+                                d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z" />
+                        </svg>
+                    </button>
+                </form>
+            </div>
+            <footer class="gemini-footer">
+                Developed by <a href="https://www.linkedin.com/in/KaaifAhmedKhan" style="color: var(--text-secondary);"
+                    target="_blank">Kaaif Ahmed Khan</a>.
+            </footer>
+        </div>
+
+        <!-- Right Panel: Live Database -->
+        <div class="right-panel">
+            <header class="db-header">
+                <h2>Live System Records</h2>
+                <button id="refresh-db" class="icon-button" title="Refresh">
+                    <svg width="20px" height="20px" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M14 7.5C14 3.91015 11.0899 1 7.5 1V0C11.6421 0 15 3.35786 15 7.5C15 9.6733 14.0751 11.6308 12.599 13H15V14H11V10H12V12.1905C13.2333 11.007 14 9.34315 14 7.5ZM2.40095 2H0V1H4V5H3V2.80955C1.76671 3.993 1 5.65685 1 7.5C1 11.0899 3.91015 14 7.5 14V15C3.35786 15 0 11.6421 0 7.5C0 5.3267 0.924851 3.36918 2.40095 2Z"
+                            fill="currentColor" />
+                    </svg>
+                </button>
+            </header>
+            <div class="cards-container" id="db-cards-container">
+                <!-- Cards injected here by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Override Modal (Hidden by default) -->
+    <div id="admin-modal" class="modal-overlay hidden">
+        <div class="modal-dialog">
+            <h2>Action Required</h2>
+            <p class="text-secondary">The AI agent is requesting permission to perform an action.</p>
+            <div id="admin-pending-details" class="pending-details">
+                <!-- details injected by js -->
+            </div>
+            <div class="modal-actions">
+                <button id="modal-deny" class="btn-deny">Deny</button>
+                <button id="modal-approve" class="btn-approve">Approve</button>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>
 </body>
+
 </html>
