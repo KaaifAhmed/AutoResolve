@@ -1,7 +1,7 @@
 // ==========================================
 // CONFIGURATION & STATE
 // ==========================================
-const API_BASE_URL = 'http://127.0.0.1:8000';
+const API_BASE_URL = 'https://autoresolve-im6i.onrender.com';
 const SESSION_ID = `user_${Math.floor(Math.random() * 100000)}`;
 const POLL_INTERVAL_MS = 3000;
 

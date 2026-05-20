@@ -18,13 +18,19 @@ async def lifespan(app: FastAPI):
 
 # Update your FastAPI app initialization to use this lifespan
 api = FastAPI(title="AutoResolve Backend", lifespan=lifespan)
+# Replace this list with your actual frontend URLs once you deploy it
+origins = [
+    "http://localhost:5500",      # For local testing (Live Server)
+    "http://127.0.0.1:5500",      # For local testing
+    "https://auto-resolve-woad.vercel.app/" # The future Vercel URL
+]
 
 api.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"], # Allows GET, POST, etc.
-    allow_headers=["*"], # Allows all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 class ChatRequest(BaseModel):
