@@ -6,7 +6,18 @@ from database import SessionLocal, Order, reset_mock_database
 
 from app import app as langchain_app, sensitive_tools
 
-api = FastAPI(title="AutoResolve Backend")
+from contextlib import asynccontextmanager
+
+# This runs exactly once when the server starts
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("🚀 Server starting up... Initializing fresh mock database!")
+    reset_mock_database()
+    yield
+    print("🛑 Server shutting down...")
+
+# Update your FastAPI app initialization to use this lifespan
+api = FastAPI(title="AutoResolve Backend", lifespan=lifespan)
 
 api.add_middleware(
     CORSMiddleware,
