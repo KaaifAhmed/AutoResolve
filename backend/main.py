@@ -22,7 +22,7 @@ api = FastAPI(title="AutoResolve Backend", lifespan=lifespan)
 origins = [
     "http://localhost:5500",      # For local testing (Live Server)
     "http://127.0.0.1:5500",      # For local testing
-    "https://auto-resolve-woad.vercel.app/"
+    "https://auto-resolve-woad.vercel.app/",
     "https://auto-resolve-woad.vercel.app" # Vercel URL
 ]
 
